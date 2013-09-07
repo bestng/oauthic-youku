@@ -1,0 +1,39 @@
+{
+  "name": "oauthic-youku"
+, "version": "0.1.0"
+, "description": "Yet another beautiful wrapped mikeal/request with OAuth 2.0 feature for Youku APIs."
+, "main": "index.js"
+, "dependencies": {
+    "async": "~0.2.9"
+  , "oauthic": "0.1.X"
+  }
+, "devDependencies": {
+    "mocha": "*"
+  , "mocha-lcov-reporter": "*"
+  , "coveralls": "*"
+  , "should": "*"
+  , "restify": "*"
+  , "blanket": "*"
+  , "travis-cov": "*"
+  }
+, "scripts": {
+    "test": "make test-all"
+  , "blanket": { "pattern": "oauthic-youku/index.js" }
+  , "travis-cov": { "threshold": 90 }
+  }
+, "author": "XiNGRZ <chenxingyu92@gmail.com>"
+, "keywords": [
+    "oauth"
+  , "oauth2"
+  , "youku"
+  , "api"
+  , "restful"
+  ]
+, "repository": {
+    "type": "git"
+  , "url": "https://github.com/bestng/oauthic-youku.git"
+  }
+, "bugs": "https://github.com/bestng/oauthic-youku/issues"
+, "license": "MIT"
+, "engines" : { "node" : ">=0.8" }
+}
