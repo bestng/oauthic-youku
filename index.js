@@ -3,7 +3,8 @@ var oauthic = require('oauthic')
 
 var async = require('async')
   , inherits = require('util').inherits
-  , stringify = require('querystring').stringify
+  , qs = require('querystring')
+  , ur = require('url')
 
 exports.client = function (clientInfo) {
   return new Client(clientInfo)
@@ -18,23 +19,55 @@ exports.Client = Client
 
 Client.prototype.BASE_URL = 'https://openapi.youku.com/v2'
 
-!['get', 'post'].forEach(function (key) {
-  var original = Client.prototype[key]
-  Client.prototype[key] = function (uri, options, callback) {
-    if ('function' === typeof options) {
-      callback = options
-      options = {}
-    }
-
-    options = options || {}
-
-    if ('undefined' === typeof options.json) {
-      options.json = true
-    }
-
-    return original.call(this, uri, options, callback)
+var _get = Client.prototype.get
+Client.prototype.get = function (uri, options, callback) {
+  if ('function' === typeof options) {
+    callback = options
+    options = {}
   }
-})
+
+  options = options || {}
+
+  if ('undefined' === typeof options.json) {
+    options.json = true
+  }
+
+  if (this.accessToken
+    && (this.clientInfo && this.clientInfo.clientId)) {
+    var url = ur.parse(uri, true)
+    url.query['client_id'] = this.clientInfo.clientId
+    url.query['access_token'] = this.accessToken
+    uri = ur.format(url)
+  }
+
+  return _get.call(this, uri, options, callback)
+}
+
+var _post = Client.prototype.post
+Client.prototype.post = function (uri, options, callback) {
+  if ('function' === typeof options) {
+    callback = options
+    options = {}
+  }
+
+  options = options || {}
+
+  if ('undefined' === typeof options.json) {
+    options.json = true
+  }
+
+  if (this.accessToken
+    && (this.clientInfo && this.clientInfo.clientId)) {
+    if (!options.form) {
+      options.form = {}
+    }
+
+    options.form['client_id'] = this.clientInfo.clientId
+    options.form['access_token'] = this.accessToken
+  }
+
+  return _post.call(this, uri, options, callback)
+}
 
 Client.prototype._authorize = function (options) {
   this.clientInfo = this.clientInfo || {}
@@ -50,7 +83,7 @@ Client.prototype._authorize = function (options) {
     query['state'] = String(options.state)
   }
 
-  return this.BASE_URL + '/oauth2/authorize?' + stringify(query)
+  return this.BASE_URL + '/oauth2/authorize?' + qs.stringify(query)
 }
 
 Client.prototype._credentical = function (code, callback) {
@@ -141,17 +174,7 @@ Client.prototype._refresh = function (refreshToken, callback) {
 }
 
 Client.prototype._use = function (options) {
-  if (this.accessToken
-    && (this.clientInfo && this.clientInfo.clientId)
-    && (options.method && 'POST' == options.method.toUpperCase())) {
-    if (!options.form) {
-      options.form = {}
-    }
-
-    options.form['client_id'] = this.clientInfo.clientId
-    options.form['access_token'] = this.accessToken
-  }
-
+  // this hook would be deprecated in the feature
   return options
 }
 
