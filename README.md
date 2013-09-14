@@ -1,4 +1,5 @@
-![OAuthic for Youku](https://github.com/bestng/oauthic-youku/raw/master/logo.png)
+OAuthic for Youku
+==========
 
 [![Build Status](https://travis-ci.org/bestng/oauthic-youku.png?branch=master)](https://travis-ci.org/bestng/oauthic-youku)
 [![Coverage Status](https://coveralls.io/repos/bestng/oauthic-youku/badge.png)](https://coveralls.io/r/bestng/oauthic-youku)
@@ -136,9 +137,11 @@ Sets the Refresh Token and/or a handler that would be called when the Access Tok
 #### Arguments
 
 - ***refreshToken*** String - Refresh Token
-- **onRefreshed(token, expiresAt, done)** Function - A handler that would be called when the Access Token is refreshed successfully by the Refresh Token. It's useful because you may want to save the new Access Token to the database
-    - **token** String - The new Access Token
-    - **expiresAt** Date - The time when the new Access Token expires
+- **onRefreshed(refreshed, done)** Function - A handler that would be called when the Access Token is refreshed successfully by the Refresh Token. It's useful because you may want to save the new Access Token to the database
+    - **refreshed** - Refreshed credenticals
+        - **accessToken** String - The new Access Token
+        - **expiresAt** Date - The time when the new Access Token expires
+        - **refreshToken** String - The new Refresh Token
     - **done([err])** Function - A callback that must be called to continue the flow after you have finished dealing with the new Token
         - ***err*** Error - Would be an error object
 
