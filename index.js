@@ -6,78 +6,30 @@ var async = require('async')
   , qs = require('querystring')
   , ur = require('url')
 
-exports.client = function (clientInfo) {
-  return new Client(clientInfo)
-}
+exports.client = exports.Client = Client
+exports.TokenExpiredError = oauthic.TokenExpiredError
+exports.EndpointError = oauthic.EndpointError
 
 function Client (clientInfo) {
+  if (!(this instanceof Client)) {
+    return new Client(clientInfo)
+  }
+
   oauthic.Client.apply(this, arguments)
 }
 
 inherits(Client, oauthic.Client)
-exports.Client = Client
 
 Client.prototype.BASE_URL = 'https://openapi.youku.com/v2'
 
-var _get = Client.prototype.get
-Client.prototype.get = function (uri, options, callback) {
-  if ('function' === typeof options) {
-    callback = options
-    options = {}
-  }
-
-  options = options || {}
-
-  if ('undefined' === typeof options.json) {
-    options.json = true
-  }
-
-  if (this.accessToken
-    && (this.clientInfo && this.clientInfo.clientId)) {
-    var url = ur.parse(uri, true)
-    url.query['client_id'] = this.clientInfo.clientId
-    url.query['access_token'] = this.accessToken
-    uri = ur.format(url)
-  }
-
-  return _get.call(this, uri, options, callback)
-}
-
-var _post = Client.prototype.post
-Client.prototype.post = function (uri, options, callback) {
-  if ('function' === typeof options) {
-    callback = options
-    options = {}
-  }
-
-  options = options || {}
-
-  if ('undefined' === typeof options.json) {
-    options.json = true
-  }
-
-  if (this.accessToken
-    && (this.clientInfo && this.clientInfo.clientId)) {
-    if (!options.form) {
-      options.form = {}
-    }
-
-    options.form['client_id'] = this.clientInfo.clientId
-    options.form['access_token'] = this.accessToken
-  }
-
-  return _post.call(this, uri, options, callback)
-}
-
 Client.prototype._authorize = function (options) {
-  this.clientInfo = this.clientInfo || {}
   options = options || {}
 
   var query = {}
 
-  query['client_id'] = this.clientInfo.clientId
+  query['client_id'] = this.clientId
   query['response_type'] = 'code'
-  query['redirect_uri'] = this.clientInfo.redirectUri
+  query['redirect_uri'] = this.redirectUri
 
   if (options.state) {
     query['state'] = String(options.state)
@@ -89,17 +41,15 @@ Client.prototype._authorize = function (options) {
 Client.prototype._credentical = function (code, callback) {
   var self = this
 
-  self.clientInfo = self.clientInfo || {}
-
   async.waterfall([
     function (next) {
       request.post(self.BASE_URL + '/oauth2/token', {
         form: {
-          'client_id': self.clientInfo.clientId
-        , 'client_secret': self.clientInfo.clientSecret
+          'client_id': self.clientId
+        , 'client_secret': self.clientSecret
         , 'grant_type': 'authorization_code'
         , 'code': code
-        , 'redirect_uri': self.clientInfo.redirectUri
+        , 'redirect_uri': self.redirectUri
         }
       , json: true
       }, function (err, res, json) {
@@ -108,7 +58,7 @@ Client.prototype._credentical = function (code, callback) {
         }
 
         if (json.error) {
-          return next(json)
+          return next(new oauthic.EndpointError(json))
         }
 
         var credentical = {
@@ -123,7 +73,7 @@ Client.prototype._credentical = function (code, callback) {
   , function (credentical, next) {
       request.post(self.BASE_URL + '/users/myinfo.json', {
         form: {
-          'client_id': self.clientInfo.clientId
+          'client_id': self.clientId
         , 'access_token': credentical.accessToken
         }
       , json: true
@@ -133,7 +83,7 @@ Client.prototype._credentical = function (code, callback) {
         }
 
         if (json.error) {
-          return next(json)
+          return next(new oauthic.EndpointError(json))
         }
 
         var userInfo = {
@@ -150,12 +100,10 @@ Client.prototype._credentical = function (code, callback) {
 }
 
 Client.prototype._refresh = function (refreshToken, callback) {
-  this.clientInfo = this.clientInfo || {}
-
   request.post(this.BASE_URL + '/oauth2/token', {
     form: {
-      'client_id': this.clientInfo.clientId
-    , 'client_secret': this.clientInfo.clientSecret
+      'client_id': this.clientId
+    , 'client_secret': this.clientSecret
     , 'grant_type': 'refresh_token'
     , 'refresh_token': refreshToken
     }
@@ -163,6 +111,10 @@ Client.prototype._refresh = function (refreshToken, callback) {
   }, function (err, res, json) {
     if (err) {
       return callback(err)
+    }
+
+    if (json.error) {
+      return callback(new oauthic.EndpointError(json))
     }
 
     callback(null, {
@@ -173,9 +125,32 @@ Client.prototype._refresh = function (refreshToken, callback) {
   })
 }
 
-Client.prototype._use = function (options) {
-  // this hook would be deprecated in the feature
-  return options
+Client.prototype._use = function (uri, options, method) {
+  if (this.clientId && this.accessToken) {
+    if ('get' == method) {
+      var url = ur.parse(uri, true)
+
+      delete url.path
+      delete url.href
+      delete url.search
+
+      url.query['client_id'] = this.clientId
+      url.query['access_token'] = this.accessToken
+
+      uri = ur.format(url)
+    }
+    else {
+      options.form = options.form || {}
+      options.form['client_id'] = this.clientId
+      options.form['access_token'] = this.accessToken
+    }
+  }
+
+  if ('undefined' === typeof options.json) {
+    options.json = true
+  }
+
+  return uri
 }
 
 exports.TokenExpiredError = oauthic.TokenExpiredError

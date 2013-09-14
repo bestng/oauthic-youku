@@ -1,11 +1,11 @@
 {
   "name": "oauthic-youku"
-, "version": "0.1.0"
+, "version": "0.2.0"
 , "description": "Yet another beautiful wrapped mikeal/request with OAuth 2.0 feature for Youku APIs."
 , "main": "index.js"
 , "dependencies": {
     "async": "~0.2.9"
-  , "oauthic": "0.1.X"
+  , "oauthic": "0.2.X"
   }
 , "devDependencies": {
     "mocha": "*"
