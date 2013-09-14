@@ -6,7 +6,7 @@ OAuthic for Youku
 [![Dependency Status](https://david-dm.org/bestng/oauthic-youku.png)](https://david-dm.org/bestng/oauthic-youku)
 [![NPM version](https://badge.fury.io/js/oauthic-youku.png)](http://badge.fury.io/js/oauthic-youku)
 
-Yet another beautiful wrapped [mikeal/request](https://github.com/mikeal/request) with OAuth 2.0 feature for [Youku](http://open.youku.com/).
+Yet another beautiful wrapped [mikeal/request](https://github.com/mikeal/request) with OAuth 2.0 feature for [Youku](http://open.youku.com/docs/%E6%8A%80%E6%9C%AF%E6%96%87%E6%A1%A3/api%E6%96%87%E6%A1%A3).
 
 ## Install
 
