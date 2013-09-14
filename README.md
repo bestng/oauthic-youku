@@ -37,15 +37,15 @@ var client = require('oauthic-youku').client({
   , clientSecret: '228bnzokjpasiodufc'
   })
   .token(accessToken, expiresAt)
-  .refresh(refreshToken, function (token, expiresAt, next) {
-    // saveToDb(token)
+  .refresh(refreshToken, function (refreshed, next) {
+    // saveToDb(refreshed)
     return next()
   })
   .expired(function (token) {
     // log(token + ' has expired and could not be refreshed.')
   })
 
-client.get('/mirror/v1/timeline', function (err, res, timeline) {
+client.get('/videos/by_me', function (err, res, timeline) {
   // ...
 })
 ```
@@ -76,16 +76,6 @@ Build the URL of the authorization page.
 #### Arguments
 
 - **options** - Additional parameters
-    - ***scope*** String | Array - Additional scopes. Should be an array or a string separated by a space. Defaults to `openid profile`
-    - ***state*** String - A parameter that would be in the query string in `redirectUri`. It's useful in avoiding CSRF attacking
-    - ***prompt*** String - A space-delimited list of string values that specifies whether to prompts the user for re-authentication and consent. Possible values (see [youku's OAuth 2.0 docs](https://developers.youku.com/accounts/docs/OAuth2Login#authenticationuriparameters) for more):
-        - `none` - do not display any authentication or consent pages
-        - `consent` - prompt the user for consent
-        - `select_account` - prompt the user to select a user account
-    - ***display*** String - Specifies how to display the authentication page. Possible values: `page`, `popup`, `touch` or `wap`
-    - ***loginHint*** - Provides the user's unique ID or email if it's known to skip the multi-login selecting page or pre-fill the email box on the sign-in form
-    - ***accessType*** - Either `online` (default value) or `offline`. Should be `offline` if you want a Refresh Token
-    - ***approvalPrompt*** - Should be `force` if you want a Refresh Token
 
 #### Returns
 
@@ -103,14 +93,11 @@ Get Access Token with an Authorization Code and get ready for making a request.
     - **credentical** Object - Token informations
         - **accessToken** String - Access Token
         - **expiresAt** Date - The time when Access Token expires
-        - ***refreshToken*** String - Refresh Token
+        - **refreshToken** String - Refresh Token
     - **userInfo** Object - Additional user informations
         - **id** String - The user's unique ID
-        - ***picture*** String - The URL of user's avatar picture (requires `profile` scope)
-        - ***name*** String - The user's display name (requires `profile` scope)
-        - ***gender*** String - The user's gender (requires `profile` scope)
-        - ***locale*** String - The user's language (requires `profile` scope)
-        - ***email*** String The user's email address (requires `email` scope)
+        - **picture** String - The URL of user's avatar picture
+        - **name** String - The user's display name
         - ***_json*** - Object - Original JSON responsed
 
 #### Returns
