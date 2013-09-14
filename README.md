@@ -151,17 +151,14 @@ Wrapped methods from [mikeal/request](https://github.com/mikeal/request). Genera
 
 #### Errors
 
-- oauthic.TokenExpiredError - The Access Token is expired and could not be refreshed
+- TokenExpiredError - The Access Token is expired and could not be refreshed
+- EndpointError - Error from API endpoint
 
 ### client.accessToken
 
 - String
 
 Returns the current user's Access Token. Useful when you'd prefer building request parameters manually.
-
-## oauthic.TokenExpiredError
-
-Occurs when the Access Token is expired and could not be refreshed.
 
 #### Properties
 
